@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file           : bsec2.h
   * @author         : Mauricio Barroso Benavides
-  * @date           : Jan 24, 2023
-  * @brief          : todo: write brief 
+  * @date           : Apr 8, 2023
+  * @brief          : Header of ESP-IDF BSEC2 component
   ******************************************************************************
   * @attention
   *
@@ -43,19 +43,22 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
 #include "esp_timer.h"
+
+/* Dependent library headers */
 #include "bme68x_lib.h"
 #include "bsec_datatypes.h"
 #include "bsec_interface.h"
+#include "bsec_interface_multi.h"
 
 /* Exported macro ------------------------------------------------------------*/
-#define BME68X_PERIOD_POLL				UINT32_C(5000)
-
 #ifndef ARRAY_LEN
-#define ARRAY_LEN(array)				(sizeof(array)/sizeof(array[0]))
+#define ARRAY_LEN(array)	(sizeof(array)/sizeof(array[0]))
 #endif
 
-#define BSEC_CHECK_INPUT(x, shift)		(x & (1 << (shift-1)))
-#define BSEC_TOTAL_HEAT_DUR             UINT16_C(140)
+#define BSEC_CHECK_INPUT(x, shift)				(x & (1 << (shift-1)))
+#define BSEC_TOTAL_HEAT_DUR								UINT16_C(140)
+#define BSEC_INSTANCE_SIZE								3272
+#define BSEC_E_INSUFFICIENT_INSTANCE_SIZE	(bsec_library_return_t)-105
 
 /* Exported typedef ----------------------------------------------------------*/
 typedef bsec_output_t bsec_data_t;
@@ -68,7 +71,7 @@ typedef struct {
 
 typedef struct bsec2_t bsec2_t;
 
-typedef void (* bsec_callback_t)(const bme68x_data_t data, const bsec_outputs_t outputs, bsec2_t bsec);
+typedef void (* bsec_callback_t)(const bme68x_data_t data, const bsec_outputs_t outputs, bsec2_t bsec2);
 
 struct bsec2_t {
 	bme68x_lib_t sensor;
@@ -81,6 +84,7 @@ struct bsec2_t {
 	float ext_temp_offset;
 	uint32_t ovf_counter;
 	uint32_t last_millis;
+	uint8_t * bsec_instance;
 };
 
 /* Exported variables --------------------------------------------------------*/
@@ -143,7 +147,7 @@ const bsec_outputs_t * bsec2_get_outputs(bsec2_t * const me);
  *
  * @return	pointer to BSEC output, nullptr otherwise
  */
-const bsec_data_t bsec2_get_data(bsec2_t * const me, bsec_sensor_t id);
+bsec_data_t bsec2_get_data(bsec2_t * const me, bsec_sensor_t id);
 
 /**
  * @brief Function to get the state of the algorithm to save to non-volatile memory
@@ -199,6 +203,21 @@ void bsec2_set_temperature_offset(bsec2_t * const me, float temp_offset);
  * @param me : Pointer to a structure instance of bsec2_t
  */
 int64_t bsec2_get_time_ms(bsec2_t * const me);
+
+/**
+ * @brief Function to assign the memory block to the bsec instance
+ *
+ * @param me            : Pointer to a structure instance of bsec2_t
+ * @param[in] mem_block : reference to the memory block
+ */
+void bsec2_allocate_memory(bsec2_t * const me, uint8_t mem_block[BSEC_INSTANCE_SIZE]);
+
+/**
+ * @brief Function to de-allocate the dynamically allocated memory
+ *
+ * * @param me : Pointer to a structure instance of bsec2_t
+ */
+void bsec2_clear_memory(bsec2_t * const me);
 
 #ifdef __cplusplus
 }
