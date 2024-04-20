@@ -51,28 +51,28 @@ static uint8_t work_buffer[BSEC_MAX_WORKBUFFER_SIZE];
  * @param currTimeNs: Current time in ns
  * @return true if there are new outputs. false otherwise
  */
-static bool process_data(bsec2_t * const me, int64_t curr_time_ns, const bme68x_data_t * data);
+static bool process_data(bsec2_t *const me, int64_t curr_time_ns, const bme68x_data_t * data);
 
 /**
  * @brief Common code for the begin function
  */
-static bool begin_common(bsec2_t * const me);
+static bool begin_common(bsec2_t *const me);
 
 /**
  * @brief Set the BME68x sensor configuration to forced mode
  */
-static void set_bme68x_config_forced(bsec2_t * const me);
+static void set_bme68x_config_forced(bsec2_t *const me);
 
 /**
  * @brief Set the BME68x sensor configuration to parallel mode
  */
-static void set_bme68x_config_parallel(bsec2_t * const me);
+static void set_bme68x_config_parallel(bsec2_t *const me);
 
 /* Exported functions --------------------------------------------------------*/
 /**
  * @brief Function to initialize an instance of BSEC2
  */
-bool bsec2_init(bsec2_t * const me, void * arg, bme68x_intf_t intf) {
+bool bsec2_init(bsec2_t *const me, void *arg, bme68x_intf_t intf) {
 	me->ovf_counter = 0;
 	me->last_millis = 0;
 	me->status = BSEC_OK;
@@ -97,7 +97,7 @@ bool bsec2_init(bsec2_t * const me, void * arg, bme68x_intf_t intf) {
 /**
  * @brief Function to request/subscribe for desired virtual outputs with the supported sample rates
  */
-bool bsec2_update_subscription(bsec2_t * const me, bsec_sensor_t sensor_list[], uint8_t n_sensors,
+bool bsec2_update_subscription(bsec2_t *const me, bsec_sensor_t sensor_list[], uint8_t n_sensors,
 		float sample_rate) {
 	bsec_sensor_configuration_t virtual_sensors[BSEC_NUMBER_OUTPUTS];
 	bsec_sensor_configuration_t sensor_settings[BSEC_MAX_PHYSICAL_SENSOR];
@@ -125,7 +125,7 @@ bool bsec2_update_subscription(bsec2_t * const me, bsec_sensor_t sensor_list[], 
 /**
  * @brief Callback from the user to read data from the BME68X using parallel mode/forced mode, process and store outputs
  */
-bool bsec2_run(bsec2_t * const me) {
+bool bsec2_run(bsec2_t *const me) {
 	uint8_t n_fields_left = 0;
 	bme68x_data_t data;
 	int64_t curr_time_ns = bsec2_get_time_ms(me) * INT64_C(1000000);
@@ -182,14 +182,14 @@ bool bsec2_run(bsec2_t * const me) {
 	return true;
 }
 
-void bsec2_attach_callback(bsec2_t * const me, bsec_callback_t callback) {
+void bsec2_attach_callback(bsec2_t *const me, bsec_callback_t callback) {
 	me->new_data_callback = callback;
 }
 
 /**
  * @brief Function to get the BSEC outputs
  */
-const bsec_outputs_t * bsec2_get_outputs(bsec2_t * const me) {
+const bsec_outputs_t * bsec2_get_outputs(bsec2_t *const me) {
     if (me->outputs.n_outputs) {
         return &me->outputs;
     }
@@ -200,7 +200,7 @@ const bsec_outputs_t * bsec2_get_outputs(bsec2_t * const me) {
 /**
  * @brief Function to get the BSEC output by sensor id
  */
-bsec_data_t bsec2_get_data(bsec2_t * const me, bsec_sensor_t id) {
+bsec_data_t bsec2_get_data(bsec2_t *const me, bsec_sensor_t id) {
 	bsec_data_t emp;
 
 	memset(&emp, 0, sizeof(emp));
@@ -217,7 +217,7 @@ bsec_data_t bsec2_get_data(bsec2_t * const me, bsec_sensor_t id) {
 /**
  * @brief Function to get the state of the algorithm to save to non-volatile memory
  */
-bool bsec2_get_state(bsec2_t * const me, uint8_t * state) {
+bool bsec2_get_state(bsec2_t *const me, uint8_t * state) {
 	uint32_t n_serialized_state = BSEC_MAX_STATE_BLOB_SIZE;
 
 	me->status = bsec_get_state_m(me->bsec_instance,
@@ -238,7 +238,7 @@ bool bsec2_get_state(bsec2_t * const me, uint8_t * state) {
 /**
  * @brief Function to set the state of the algorithm from non-volatile memory
  */
-bool bsec2_set_state(bsec2_t * const me, uint8_t * state) {
+bool bsec2_set_state(bsec2_t *const me, uint8_t * state) {
 	me->status = bsec_set_state_m(me->bsec_instance,
 			state,
 			BSEC_MAX_STATE_BLOB_SIZE,
@@ -257,7 +257,7 @@ bool bsec2_set_state(bsec2_t * const me, uint8_t * state) {
 /**
  * @brief Function to retrieve the current library configuration
  */
-bool bsec2_get_config(bsec2_t * const me, uint8_t * config) {
+bool bsec2_get_config(bsec2_t *const me, uint8_t * config) {
 	uint32_t n_serialized_settings = 0;
 
 	me->status = bsec_get_configuration_m(me->bsec_instance,
@@ -278,7 +278,7 @@ bool bsec2_get_config(bsec2_t * const me, uint8_t * config) {
 /**
   * @brief Function to set the configuration of the algorithm from memory
   */
-bool bsec2_set_config(bsec2_t * const me, const uint8_t * config) {
+bool bsec2_set_config(bsec2_t *const me, const uint8_t * config) {
 	me->status = bsec_set_configuration_m(me->bsec_instance,
 			config,
 			BSEC_MAX_PROPERTY_BLOB_SIZE,
@@ -297,14 +297,14 @@ bool bsec2_set_config(bsec2_t * const me, const uint8_t * config) {
 /**
  * @brief Function to set the temperature offset
  */
-void bsec2_set_temperature_offset(bsec2_t * const me, float temp_offset) {
+void bsec2_set_temperature_offset(bsec2_t *const me, float temp_offset) {
 	me->ext_temp_offset = temp_offset;
 }
 
 /**
  * @brief Function to calculate an int64_t timestamp in milliseconds
  */
-int64_t bsec2_get_time_ms(bsec2_t * const me) {
+int64_t bsec2_get_time_ms(bsec2_t *const me) {
 	int64_t time_ms = (unsigned long)(esp_timer_get_time() / 1000ULL);
 
 	if (me->last_millis > time_ms) {/* An overflow occurred */
@@ -319,7 +319,7 @@ int64_t bsec2_get_time_ms(bsec2_t * const me) {
 /**
  * @brief Function to assign the memory block to the bsec instance
  */
-void bsec2_allocate_memory(bsec2_t * const me, uint8_t mem_block[BSEC_INSTANCE_SIZE]) {
+void bsec2_allocate_memory(bsec2_t *const me, uint8_t mem_block[BSEC_INSTANCE_SIZE]) {
 	/* Allocate memory for the bsec instance */
 	me->bsec_instance = mem_block;
 }
@@ -327,7 +327,7 @@ void bsec2_allocate_memory(bsec2_t * const me, uint8_t mem_block[BSEC_INSTANCE_S
 /**
  * @brief Function to de-allocate the dynamically allocated memory
  */
-void bsec2_clear_memory(bsec2_t * const me) {
+void bsec2_clear_memory(bsec2_t *const me) {
 
 }
 
@@ -335,7 +335,7 @@ void bsec2_clear_memory(bsec2_t * const me) {
 /**
  * @brief Reads the data from the BME68x sensor and process it
  */
-static bool process_data(bsec2_t * const me, int64_t curr_time_ns, const bme68x_data_t * data) {
+static bool process_data(bsec2_t *const me, int64_t curr_time_ns, const bme68x_data_t * data) {
 	bsec_input_t inputs[BSEC_MAX_PHYSICAL_SENSOR]; /* Temp, Pres, Hum & Gas */
 	uint8_t n_inputs = 0;
 
@@ -416,7 +416,7 @@ static bool process_data(bsec2_t * const me, int64_t curr_time_ns, const bme68x_
 /**
  * @brief Common code for the begin function
  */
-static bool begin_common(bsec2_t * const me) {
+static bool begin_common(bsec2_t *const me) {
 	if (!me->bsec_instance) {
 		/* Allocate memory for the instance if not allocated */
 		me->bsec_instance = malloc(bsec_get_instance_size_m());
@@ -448,7 +448,7 @@ static bool begin_common(bsec2_t * const me) {
 /**
  * @brief Set the BME68X sensor configuration to forced mode
  */
-static void set_bme68x_config_forced(bsec2_t * const me) {
+static void set_bme68x_config_forced(bsec2_t *const me) {
   /* Set the filter, odr, temperature, pressure and humidity settings */
 	bme68x_lib_set_tph(&me->sensor, me->bme_conf.temperature_oversampling,
 			me->bme_conf.pressure_oversampling, me->bme_conf.humidity_oversampling);
@@ -476,7 +476,7 @@ static void set_bme68x_config_forced(bsec2_t * const me) {
 /**
  * @brief Set the BME68X sensor configuration to parallel mode
  */
-static void set_bme68x_config_parallel(bsec2_t * const me) {
+static void set_bme68x_config_parallel(bsec2_t *const me) {
 	uint16_t shared_heater_dur = 0;
 
   /* Set the filter, odr, temperature, pressure and humidity settings */
