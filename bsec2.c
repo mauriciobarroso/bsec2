@@ -168,8 +168,11 @@ bool bsec2_run(bsec2_t *const me) {
 				do {
 					n_fields_left = bme68x_lib_get_data(&me->sensor, &data);
 
-	        /* check for valid gas data */
+					/* check for valid gas data */
 					if (data.status & BME68X_GASM_VALID_MSK) {
+						/* Convert sensor raw pressure unit from pascal to hecto pascal */
+						data.pressure *= 0.01f;
+
 						if (!process_data(me, curr_time_ns, &data)) {
 							return false;
 						}
